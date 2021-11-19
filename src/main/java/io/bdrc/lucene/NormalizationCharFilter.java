@@ -22,8 +22,7 @@ public class NormalizationCharFilter extends MappingCharFilter {
         builder.add("\u17C1\u17B6", "\u17C4"); // កេា=កោ
         builder.add("\u17D2\u179A\u17D2", "\u17D2\u179A"); // coeng rho must be the last coeng
         // TODO: check
-        //builder.add("\u17BB\u17D0", "\u17C9\u17D0"); // samyok sannya causes downshifting so cannot occur with -u​​​ (មុ័=ម៉័)
-        builder.add("\u17D2\u178A", "\u17D2\u178F"); // not in Middle Khmer
+        //builder.add("\u17BB\u17D0", "\u17C9\u17D0"); // samyok sannya causes downshifting so cannot occur with -u (មុ័=ម៉័)
         builder.add("\u17B4", ""); // invisible, discouraged
         builder.add("\u17B5", ""); // invisible, discouraged
         builder.add("\u17E2\u17D3", "\u19E0"); // deprecated
@@ -57,6 +56,7 @@ public class NormalizationCharFilter extends MappingCharFilter {
         builder.add("\u178A\u17D2\u1792", "\u178A\u17D2\u178B"); // ដ្ធ ~ ដ្ឋ
         builder.add("\u1789\u17D2\u179C", "\u1796\u17D2\u179C\u17B6"); // ញ្វ ~ ព្វា
         builder.add(":", "\u17C8"); // common confusion
+        builder.add("\u17D2\u178A", "\u17D2\u178F"); // Coeng Da / Coeng Ta
         if (level < 2)
             return builder.build();
         builder.add("\u17DD", "\u17D1");

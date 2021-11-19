@@ -9,12 +9,12 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 
 /**
- * Tokenizes a string in Khmer "graphical syllables". Graphical syllables are not phonetic syllables, for instance:
- * ខ្ញុំចង់ធ្វើការ will be tokenized as "ខ្ញុំ", "ច", "ង់", "ធ្វើ", "កា", "រ", not "ខ្ញុំ", "ចង់", "ធ្វើ", "ការ". It uses a simple state machine to do so.
+ * Tokenizes a string in Khmer grapheme clusters (not phonetic syllables), for instance:
+ * "ខ្ញុំចង់ធ្វើការ" will be tokenized as "ខ្ញុំ", "ច", "ង់", "ធ្វើ", "កា", "រ", not "ខ្ញុំ", "ចង់", "ធ្វើ", "ការ". It uses a simple state machine to do so.
  * 
  */
 
-public class GraphicalSyllableTokenizer  extends Tokenizer {
+public class GraphemeClusterTokenizer  extends Tokenizer {
 
     
     private int offset = 0, bufferIndex = 0, dataLen = 0, finalOffset = 0;
@@ -30,7 +30,7 @@ public class GraphicalSyllableTokenizer  extends Tokenizer {
     /**
      * Construct a new TibSyllableTokenizer.
      */
-    public GraphicalSyllableTokenizer() {
+    public GraphemeClusterTokenizer() {
     }
 
     // states
