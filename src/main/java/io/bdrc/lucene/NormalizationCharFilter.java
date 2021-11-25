@@ -72,6 +72,7 @@ public class NormalizationCharFilter extends MappingCharFilter {
         builder.add("\u17E7", "7");
         builder.add("\u17E8", "8");
         builder.add("\u17E9", "9");
+        builder.add("\u17C9", "\u17CA"); // from examples in the document, ex: ស៉ី / ស៊ី or ស៉ើប / ស៊ើប
         builder.add("\u17A7\u17CA", "\u17A8"); // ឧ៊ ~ ឨ
         return builder.build();
     }

@@ -70,7 +70,21 @@ public class AnalyzerTest {
     public void CharReorderTest() throws IOException {
         System.out.println("Testing CharReorderFilter()");
         assertReorder("ស្រ្តី ស្ត្រី ស្រ្ដី ស្ដ្រី ស្រី្ត ស្តី្រ ស្រី្ដ ស្ដី្រ សី្ត្រ  សី្ដ្រ សី្រ្ត សី្រ្ដ ",  Arrays.asList("ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី", "ស្ត្រី"));
-        //assertReorder("ស៊ើប សើុប ស៊េីប ស៉ើប សេីុប សុើប  ",  Arrays.asList("ស៊ើប ស៊ើប ស៊ើប ស៊ើប ស៊ើប ស៊ើប"));
+        assertReorder("ស៊ើ សើុ ស៊េី សេីុ សុើ",  Arrays.asList("ស៊ើ", "ស៊ើ", "ស៊ើ", "ស៊ើ", "ស៊ើ"));
+    }
+    
+    public void assertFullAnalysis(final String s, final List<String> expected) throws IOException {
+        Reader reader = new StringReader(s);
+        System.out.print(s + " => ");
+        TokenStream toks = tokenize(new NormalizationCharFilter(reader, 2), new WhitespaceTokenizer());
+        CharReorderFilter res = new CharReorderFilter(toks);
+        assertTokenStream(res, expected);
+    }
+    
+    @Test
+    public void FullAnalysisTest() throws IOException {
+        System.out.println("Testing full analyzer");
+        assertFullAnalysis("ស៊ើ សើុ ស៊េី សេីុ សុើ",  Arrays.asList("ស៊ើ", "ស៊ើ", "ស៊ើ", "ស៊ើ", "ស៊ើ"));
     }
     
 }
