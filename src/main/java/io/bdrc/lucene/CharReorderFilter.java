@@ -74,7 +74,7 @@ public class CharReorderFilter extends TokenFilter  {
         final char[] buffer = termAtt.buffer();
         final int len = termAtt.length();
 
-        if (len < 2)
+        if (len < 2 || len > 30)
             return true;
         // if token doesn't start with a base, don't reorder
         if (charcat(buffer[0]) != ChCat.BASE)

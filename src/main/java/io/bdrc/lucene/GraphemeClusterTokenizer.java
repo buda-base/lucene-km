@@ -34,26 +34,24 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
     }
 
     // states
-    public final static int ST_AFTEROTHER = 1;
-    public final static int ST_INSIDESYL = 2;
-    public final static int ST_AFTERCOENG = 3;
-    public final static int ST_AFTERDIGIT = 4;
+    public final static int ST_INSIDESYL = 1;
+    public final static int ST_AFTERCOENG = 2;
+    public final static int ST_AFTERDIGIT = 3;
+    public final static int ST_INIT = 4;
     
     // char categories
-    public final static int CHCAT_OTHER = 1; // anything else than the rest
-    public final static int CHCAT_BASE = 2; // consonnants or independent vowels ("base")
-    public final static int CHCAT_INSIDE = 3; // anything that can be inside a syllable after the base
-    public final static int CHCAT_COENG = 4; // coeng
-    public final static int CHCAT_DIGIT = 5; // digit
-    public final static int CHCAT_IGNORE = 6; // ignore (punctuation)
+    public final static int CHCAT_BASE = 1; // consonnants or independent vowels ("base")
+    public final static int CHCAT_INSIDE = 2; // anything that can be inside a syllable after the base
+    public final static int CHCAT_COENG = 3; // coeng
+    public final static int CHCAT_DIGIT = 4; // digit
+    public final static int CHCAT_IGNORE = 5; // ignore (punctuation and the rest)
     
     public static final int category(int c) {
         if (('\u17E0' <= c && c <= '\u17F9') || ('0' <= c && c <= '9')) return CHCAT_DIGIT;
-        if (('\u17D4' <= c && c <= '\u17DA') || c == ' ' || c == '(' || c == ')') return CHCAT_IGNORE;
         if ('\u1780' <= c && c <= '\u17B3') return CHCAT_BASE;
-        if (('\u17B6' <= c && c <= '\u17D3') || c == '\u17DD' || c == '\u200C' || c == '\u200D') return CHCAT_INSIDE;
         if (c == '\u17D2') return CHCAT_COENG;
-        return CHCAT_OTHER;
+        if (('\u17B6' <= c && c <= '\u17D3') || c == '\u17DD' || c == '\u200C' || c == '\u200D') return CHCAT_INSIDE;
+        return CHCAT_IGNORE;
     }
     
     @Override
@@ -63,7 +61,7 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
       int start = -1; // this variable is always initialized
       int end = -1;
       char[] buffer = termAtt.buffer();
-      int state = ST_AFTEROTHER;
+      int state = ST_INIT;
       while (true) {
         if (bufferIndex >= dataLen) {
           offset += dataLen;
@@ -87,6 +85,15 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
         bufferIndex += charCount;
         
         final int charcat = category(c);
+        
+        if (charcat == CHCAT_IGNORE) {
+            if (length > 0)
+                break;
+            else
+                continue;
+        }
+        
+        //System.out.println(String.format("char %x , charcat %d, state %d", c, charcat, state));
         
         // break before the next character
         boolean breakB = false;
@@ -117,7 +124,7 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
          */
         
         switch (state) {
-        case ST_AFTEROTHER:
+        case ST_INIT:
             if (charcat == CHCAT_BASE) {
                 breakB = true;
                 state = ST_INSIDESYL;
@@ -133,7 +140,7 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
                 breakB = true;
             break;
         case ST_AFTERCOENG:
-            if (charcat == CHCAT_DIGIT || charcat == CHCAT_OTHER)
+            if (charcat == CHCAT_DIGIT)
                 breakB = true;
             else if (charcat != CHCAT_COENG)
                 state = ST_INSIDESYL;
@@ -144,9 +151,13 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
             break;
         }
         
-        if ((breakB || charcat == CHCAT_IGNORE) && length > 0)
-            break;
+        //System.out.println(String.format("   => break %b , state %d, length %d", breakB, state, length));
         
+        if (breakB && length > 0) {
+            bufferIndex -= charCount;
+            break;
+        }
+
         if (length == 0) { // start of token
           start = offset + bufferIndex - charCount;
           end = start;
