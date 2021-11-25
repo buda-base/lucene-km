@@ -17,43 +17,44 @@ public class CharReorderFilter extends TokenFilter  {
         super(input);
     }
     
-    public enum ChCat {
-        OTHER((char)0), BASE((char)1), ROBAT((char)2), COENG((char)3),
-        Z((char)4), SHIFT((char)5), VOWEL((char)6), MS((char)7), MF((char)8); 
-
-        public final char value;
-
-        private ChCat(char value) {
-            this.value = value;
-        }
-    }
+    public static final char CAT_OTHER = 0;
+    public static final char CAT_BASE = 1;
+    public static final char CAT_ROBAT = 2;
+    public static final char CAT_COENG = 3;
+    public static final char CAT_Z = 4;
+    public static final char CAT_SHIFT = 5;
+    public static final char CAT_VOWEL = 6;
+    public static final char CAT_MS = 7;
+    public static final char CAT_MF = 8;
     
-    public static final List<ChCat> categories = Collections.nCopies(93, ChCat.BASE);
+    public static final char[] categories = new char[94];
     static {
-        for (int i = 51 ; i < 69 ; i++)
-            categories.set(i, ChCat.VOWEL);
-        categories.set(69, ChCat.MS);
-        categories.set(70, ChCat.MF);
-        categories.set(71, ChCat.MF);
-        categories.set(72, ChCat.SHIFT);
-        categories.set(73, ChCat.SHIFT);
-        categories.set(74, ChCat.MS);
-        categories.set(75, ChCat.ROBAT);
-        for (int i = 76 ; i < 81 ; i++)
-            categories.set(i, ChCat.MS);
-        categories.set(81, ChCat.COENG);
-        categories.set(82, ChCat.MS);
-        for (int i = 83 ; i < 92 ; i++)
-            categories.set(i, ChCat.OTHER);
-        categories.set(92, ChCat.MS);
+        for (int i = 0 ; i <= '\u17B3'-'\u1780' ; i++)
+            categories[i] = CAT_BASE;
+        for (int i = '\u17B4'-'\u1780' ; i <= '\u17C5'-'\u1780' ; i++)
+            categories[i] = CAT_VOWEL;
+        categories['\u17C6'-'\u1780'] = CAT_MS;
+        categories['\u17C7'-'\u1780'] = CAT_MF;
+        categories['\u17C8'-'\u1780'] = CAT_MF;
+        categories['\u17C9'-'\u1780'] = CAT_SHIFT;
+        categories['\u17CA'-'\u1780'] = CAT_SHIFT;
+        categories['\u17CB'-'\u1780'] = CAT_MS;
+        categories['\u17CC'-'\u1780'] = CAT_ROBAT;
+        for (int i = '\u17CD'-'\u1780' ; i <= '\u17D1'-'\u1780' ; i++)
+            categories[i] = CAT_MS;
+        categories['\u17D2'-'\u1780'] = CAT_COENG;
+        categories['\u17D3'-'\u1780'] = CAT_MS;
+        for (int i = '\u17D4'-'\u1780' ; i <= '\u17DC'-'\u1780' ; i++)
+            categories[i] = CAT_OTHER;
+        categories['\u17DD'-'\u1780'] = CAT_MS;
     }
     
-    public static final ChCat charcat(char c) {
+    public static final char charcat(char c) {
         if ('\u1780' <= c && c <= '\u17DD')
-            return categories.get(c-'\u1780');
+            return categories[c-'\u1780'];
         if (c == '\u200C' || c == '\u200D')
-            return ChCat.Z;
-        return ChCat.OTHER;
+            return CAT_Z;
+        return CAT_OTHER;
     }
     
     final static String BNB = "[\u1780-\u1793\u1795-\u17A2]";
@@ -62,8 +63,8 @@ public class CharReorderFilter extends TokenFilter  {
     final static String SS = "[\u1784\u1789\u1793\u1794\u1798-\u179D]";
     final static String VA = "[\u17B7-\u17BA\u17BE\u17D0\u17DD]|\u17B6\u17C6";
     
-    final static Pattern triisapP = Pattern.compile("{SF}(?:\u17D2{BNB}){{0,2}}|{BNB}(?:\u17D2{SF}(?:\u17D2{BNB})?|\u17D2{BNB}\u17D2{SF}))\u17BB({VA})".replace("{SF}", SF).replace("BNB", BNB).replace("{VA]", VA));
-    final static Pattern muusikatoanP = Pattern.compile("({SS}(?:\u17D2{SNF}){{0,2}}|{SNF}(?:\u17D2{SS}(?:\u17D2{SNF})?|\u17D2{SNF}\u17D2{SS}))\u17BB({VA})".replace("{SS}", SS).replace("SNF", BNB).replace("{VA]", VA));
+    final static Pattern triisapP = Pattern.compile("({SF}(?:\u17D2{BNB}){0,2}|{BNB}(?:\u17D2{SF}(?:\u17D2{BNB})?|\u17D2{BNB}\u17D2{SF}))\u17BB({VA})".replace("{SF}", SF).replace("{BNB}", BNB).replace("{VA}", VA));
+    final static Pattern muusikatoanP = Pattern.compile("({SS}(?:\u17D2{SNF}){0,2}|{SNF}(?:\u17D2{SS}(?:\u17D2{SNF})?|\u17D2{SNF}\u17D2{SS}))\u17BB({VA})".replace("{SS}", SS).replace("{SNF}", BNB).replace("{VA}", VA));
     
     @Override
     public final boolean incrementToken() throws java.io.IOException {
@@ -77,17 +78,17 @@ public class CharReorderFilter extends TokenFilter  {
         if (len < 2 || len > 30)
             return true;
         // if token doesn't start with a base, don't reorder
-        if (charcat(buffer[0]) != ChCat.BASE)
+        if (charcat(buffer[0]) != CAT_BASE)
             return true;
         
         final char[] cats = new char[len];
         
         for (int i = 0 ; i < len ; i++) {
-            ChCat cat = charcat(buffer[i]);
+            char cat = charcat(buffer[i]);
             // Recategorise base → coeng after coeng char
-            if (i > 0 && cat == ChCat.BASE && cats[i-1] == ChCat.COENG.value)
-                cat = ChCat.COENG;
-            cats[i] = cat.value;
+            if (i > 0 && cat == CAT_BASE && cats[i-1] == CAT_COENG)
+                cat = CAT_COENG;
+            cats[i] = cat;
         }
         
         final Integer[] indexes = new Integer[len];
