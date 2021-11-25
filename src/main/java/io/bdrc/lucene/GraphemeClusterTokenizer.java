@@ -51,7 +51,7 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
         if (('\u17E0' <= c && c <= '\u17F9') || ('0' <= c && c <= '9')) return CHCAT_DIGIT;
         if (('\u17D4' <= c && c <= '\u17DA') || c == ' ' || c == '(' || c == ')') return CHCAT_IGNORE;
         if ('\u1780' <= c && c <= '\u17B3') return CHCAT_BASE;
-        if (('\u17B6' <= c && c <= '\u17D3') || c == '\u17DD') return CHCAT_INSIDE;
+        if (('\u17B6' <= c && c <= '\u17D3') || c == '\u17DD' || c == '\u200C' || c == '\u200D') return CHCAT_INSIDE;
         if (c == '\u17D2') return CHCAT_COENG;
         return CHCAT_OTHER;
     }
@@ -88,6 +88,7 @@ public class GraphemeClusterTokenizer  extends Tokenizer {
         
         final int charcat = category(c);
         
+        // break before the next character
         boolean breakB = false;
         
         /*
