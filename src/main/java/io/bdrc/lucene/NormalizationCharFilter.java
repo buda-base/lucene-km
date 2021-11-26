@@ -1,6 +1,8 @@
 package io.bdrc.lucene;
 
 import java.io.Reader;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.lucene.analysis.charfilter.MappingCharFilter;
 import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
@@ -8,13 +10,24 @@ import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
 public class NormalizationCharFilter extends MappingCharFilter {
 
     public NormalizationCharFilter(Reader in) {
-        super(getTibNormalizeCharMap(0), in);
+        super(getTibNormalizeCharMapMemoized(1), in);
     }
     
     public NormalizationCharFilter(Reader in, final int level) {
-        super(getTibNormalizeCharMap(level), in);
+        super(getTibNormalizeCharMapMemoized(level), in);
     }
 
+    final static Map<Integer, NormalizeCharMap> cache = new ConcurrentHashMap<>();
+    
+    public final static NormalizeCharMap getTibNormalizeCharMapMemoized(final int level) {
+        if (cache.containsKey(level))
+            return cache.get(level);
+        final NormalizeCharMap res = getTibNormalizeCharMap(level);
+        cache.put(level, res);
+        return res;
+    }
+    
+    // level is 1, 2 or 3
     public final static NormalizeCharMap getTibNormalizeCharMap(final int level) {
         NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
         // same display ("formally confusable")
@@ -30,7 +43,7 @@ public class NormalizationCharFilter extends MappingCharFilter {
         builder.add("\u17A4", "\u17A2\u17B6"); // deprecated
         builder.add("\u17A8", "\u17A7\u1780"); // deprecated
         builder.add("\u17D8", "\u17D4\u179B\u17D4"); // deprecated
-        if (level < 1)
+        if (level < 2)
             return builder.build();
         // similar display ("informally confusable")
         builder.add("\u1791\u17D2\u1794", "\u17A1"); // ទ្យ ~ ឡ
@@ -57,7 +70,7 @@ public class NormalizationCharFilter extends MappingCharFilter {
         builder.add("\u1789\u17D2\u179C", "\u1796\u17D2\u179C\u17B6"); // ញ្វ ~ ព្វា
         builder.add(":", "\u17C8"); // common confusion
         builder.add("\u17D2\u178A", "\u17D2\u178F"); // Coeng Da / Coeng Ta
-        if (level < 2)
+        if (level < 3)
             return builder.build();
         builder.add("\u17DD", "\u17D1");
         builder.add("\u17B2", "\u17B1");
