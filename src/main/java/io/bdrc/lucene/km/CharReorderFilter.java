@@ -1,4 +1,4 @@
-package io.bdrc.lucene;
+package io.bdrc.lucene.km;
 
 import java.util.Arrays;
 import java.util.Collections;

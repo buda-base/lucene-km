@@ -1,4 +1,4 @@
-package io.bdrc.lucene;
+package io.bdrc.lucene.km;
 
 import java.io.IOException;
 import java.io.Reader;
