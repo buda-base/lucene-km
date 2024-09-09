@@ -1,8 +1,6 @@
 package io.bdrc.lucene.km;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.TokenFilter;
@@ -13,7 +11,7 @@ public class CharReorderFilter extends TokenFilter  {
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     
-    protected CharReorderFilter(TokenStream input) {
+    public CharReorderFilter(TokenStream input) {
         super(input);
     }
     
